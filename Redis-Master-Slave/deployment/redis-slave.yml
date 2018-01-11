@@ -10,18 +10,6 @@ spec:
         app: redis
         name: "redis-slave"
     spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - redis
-              topologyKey: kubernetes.io/hostname
       containers:
         - name: redis
           image: launcher.gcr.io/google/redis4
