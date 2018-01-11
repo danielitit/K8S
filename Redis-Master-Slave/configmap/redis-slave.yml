@@ -8,4 +8,4 @@ data:
     protected-mode no
     dir /var/lib/redis
     port 6379
-	slaveof redis-master 6379
+    slaveof redis-master 6379
