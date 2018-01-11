@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "redis-master"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        name: "redis-master"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - redis
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: redis
+          image: launcher.gcr.io/google/redis4
+          args:
+            - /etc/redis/redis.conf
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: "TCP"
+          volumeMounts:
+            - name: "redisconfig"
+              mountPath: "/etc/redis"
+            - name: "redis-data"
+              mountPath: "/var/lib/redis"
+      volumes:
+        - name: "redis-data"
+          persistentVolumeClaim:
+            claimName: redisdata-master
+        - name: "redisconfig"
+          configMap:
+            name: "redis-master"
+            items:
+              - key: "redis.conf"
+                path: "redis.conf"

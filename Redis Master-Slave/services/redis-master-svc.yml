@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: "redis-master"
+spec:
+  selector:
+    app: "redis"
+    name: "redis-master"
+  ports:
+    - name: "redis"
+      protocol: "TCP"
+      port: 6379
+      targetPort: 6379

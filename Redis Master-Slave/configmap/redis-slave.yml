@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-slave
+data:
+  redis.conf: |
+    appendonly yes
+    protected-mode no
+    dir /var/lib/redis
+    port 6379
+	slaveof redis-master 6379
