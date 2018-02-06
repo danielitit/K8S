@@ -4,8 +4,6 @@ metadata:
   name: nginx
 data:
   nginx.conf: |
-    worker_processes 5;
-    
     upstream backend {
       server 127.0.0.1:8000
     }
@@ -20,7 +18,7 @@ data:
       
       location / {
         lua_need_request_body off;
-        access_by_lua_file /etc/nginx/conrad-auth.lua;
+        access_by_lua_file /etc/nginx/lua/conrad-auth.lua;
         proxy_pass http://backend;
         try_files $uri $uri/ =404;
       }
