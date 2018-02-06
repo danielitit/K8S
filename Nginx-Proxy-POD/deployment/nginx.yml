@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "nginx-proxy"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+        name: "nginx-proxy"
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - nginx
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: nginx-proxy
+          image: danielitit/nginx-lua
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+          ports:
+            - name: nginx-proxy
+              containerPort: 8001
+              protocol: "TCP"
+          volumeMounts:
+            - name: "nginxconfig"
+              mountPath: "/etc/nginx/sites-available"
+      volumes:
+        - name: "nginxconfig"
+          configMap:
+            name: "nginxconfig"
+            items:
+              - key: "default"
+                path: "default"
