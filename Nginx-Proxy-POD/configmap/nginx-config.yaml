@@ -6,18 +6,16 @@ data:
   nginx.conf: |
     worker_processes 5;
 	
-	upstream backend {
+    upstream backend {
         server 127.0.0.1:8000
     }
-    
     server {
-    listen 8001;
-    
-    gzip            on;
-    gzip_proxied    any;
-    gzip_com_level  5;
-    gzip_types      application/json text/plain;
-    
+        listen 8001;
+        gzip            on;
+        gzip_proxied    any;
+        gzip_com_level  5;
+        gzip_types      application/json text/plain;
+
         location / {
             lua_need_request_body off;
             access_by_lua_file /etc/nginx/conrad-auth.lua;
