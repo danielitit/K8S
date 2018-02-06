@@ -4,47 +4,46 @@ metadata:
   name: lua-configuration
 data:
   conrad-auth.lua: |
-	local crypto = require 'crypto'
-	local redis = require 'redis'
-	-- local salt = 'thisisasalt'
+    local crypto = require 'crypto'
+    local redis = require 'redis'
+    -- local salt = 'thisisasalt'
 
-	-- Connect to Redis
-	local red, err = redis:new()
-	local ok, err = red:connect('127.0.0.1', 6379)
-	if not ok then
-		ngx.exit(502)
-	end
+    -- Connect to Redis
+    local red, err = redis:new()
+    local ok, err = red:connect('127.0.0.1', 6379)
+    if not ok then
+        ngx.exit(502)
+    end
 
-	-- Authenticate with Redis
-	local auth, err = red:auth('redis')
-	if not auth then
-		ngx.exit(502)
-	end
+    -- Authenticate with Redis
+    local auth, err = red:auth('redis')
+    if not auth then
+        ngx.exit(502)
+    end
 
-	-- Get request info
-	local mfgid = ngx.var.http_mfgid
-	local authorization = ngx.var.http_Authorization
-	-- local data = ngx.var.request_body
+    -- Get request info
+    local mfgid = ngx.var.http_mfgid
+    local authorization = ngx.var.http_Authorization
+    -- local data = ngx.var.request_body
 
-	if mfgid and authorization then
-		local deviceid, devhash = authorization:match("([^,]+),([^,]+)")
-		-- Get private key corresponding to mfgid
-		local pkey, err = red:get('conrad:devauth:' .. mfgid .. ':pkey')
-		if not pkey then
-			ngx.exit(401)
-		elseif pkey == ngx.null then
-			ngx.exit(401)
-		end
-		-- No data must be empty string
-		if not data then
-			data = ''
-		end
-		-- ngx.log(ngx.STDERR, 'DEBUG ' .. mfgid .. ' - ' .. deviceid .. ' - ' .. devhash)
-		local newhash = crypto.hmac.digest('sha256', deviceid, pkey)
-		-- ngx.log(ngx.STDERR, 'DEBUG ' .. mfgid .. ' - ' .. deviceid .. ' - ' .. devhash .. ' - ' .. newhash)
-		if string.sub(newhash, 1, 24) == string.sub(devhash, 1, 24) then
-			return
-		end
-	end
-
-	ngx.exit(401)
+    if mfgid and authorization then
+        local deviceid, devhash = authorization:match("([^,]+),([^,]+)")
+        -- Get private key corresponding to mfgid
+        local pkey, err = red:get('conrad:devauth:' .. mfgid .. ':pkey')
+        if not pkey then
+            ngx.exit(401)
+        elseif pkey == ngx.null then
+            ngx.exit(401)
+        end
+        -- No data must be empty string
+        if not data then
+            data = ''
+        end
+        -- ngx.log(ngx.STDERR, 'DEBUG ' .. mfgid .. ' - ' .. deviceid .. ' - ' .. devhash)
+        local newhash = crypto.hmac.digest('sha256', deviceid, pkey)
+        -- ngx.log(ngx.STDERR, 'DEBUG ' .. mfgid .. ' - ' .. deviceid .. ' - ' .. devhash .. ' - ' .. newhash)
+        if string.sub(newhash, 1, 24) == string.sub(devhash, 1, 24) then
+            return
+        end
+    end
+    ngx.exit(401)
